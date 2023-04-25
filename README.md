@@ -1,2 +1,10 @@
-# llmplugin
-plugin for LLM
+# LLM Plugin
+
+LLM Plugin system.
+
+
+## TESTING
+
+```bash
+go test -v ./...
+```
