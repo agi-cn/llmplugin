@@ -10,6 +10,13 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+type PluginContext struct {
+	Plugin
+
+	// Input for handle function of plugin.
+	Input string
+}
+
 type PluginManager struct {
 	llmer llm.LLMer
 
@@ -58,7 +65,7 @@ func NewPluginManager(llmer llm.LLMer, opts ...PluginManagerOpt) *PluginManager 
 }
 
 // Select to choice some plugin to finish the task.
-func (m *PluginManager) Select(ctx context.Context, query string) ([]Plugin, error) {
+func (m *PluginManager) Select(ctx context.Context, query string) ([]PluginContext, error) {
 
 	prompt := m.makePrompt(query)
 
@@ -68,20 +75,26 @@ func (m *PluginManager) Select(ctx context.Context, query string) ([]Plugin, err
 		return nil, err
 	}
 
-	plugins := m.choicePlugins(answer)
-	return plugins, nil
+	pluginCtxs := m.choicePlugins(answer)
+
+	// for debug
+	for _, c := range pluginCtxs {
+		logrus.Debugf("query: %s choice plugins: %s input: %s", query, c.GetName(), c.Input)
+	}
+
+	return pluginCtxs, nil
 }
 
 func (m *PluginManager) makePrompt(query string) string {
+
+	tools := m.makeTaskList()
 
 	prompt := fmt.Sprintf(`You are an helpful and kind assistant to answer questions that can use tools to interact with real world and get access to the latest information.
 	You will performs one task based on the following object:
 	%s
 
 	You can call one of the following functions:
-
-	- Calculator, INPUT: (expr string): ACT ON A calculator, capable of performing mathematical calculations, where the input is a description of a mathematical expression and the return is the result of the calculation. For example: the input is: one plus two, the return is three.
-	- Weather, INPUT: no input: ACT ON You can check the weather forecast.
+	%s
 
 	In each response, you must start with a function call like Tool name and args, split by space,like:
 	Google "query"
@@ -89,12 +102,31 @@ func (m *PluginManager) makePrompt(query string) string {
 
 	Don't explain why you use a tool. If you cannot figure out the answer, you say ’I don’t know’.
 
-	You can choose one tool or multiple tools to accomplish the corresponding goal.
 	Select only the corresponding tool and do not return any results.`,
 		query,
+		tools,
 	)
 
 	return prompt
+}
+
+func (m *PluginManager) makeTaskList() string {
+
+	lines := make([]string, 0, len(m.plugins))
+
+	for _, p := range m.plugins {
+
+		line := fmt.Sprintf(
+			`%s, Input Example: %s, It works as: %s`,
+			p.GetName(),
+			p.GetInputExample(),
+			p.GetDesc(),
+		)
+
+		lines = append(lines, line)
+	}
+
+	return strings.Join(lines, "\n")
 }
 
 func (m *PluginManager) chatWithLlm(ctx context.Context, query string) (string, error) {
@@ -110,18 +142,20 @@ func (m *PluginManager) chatWithLlm(ctx context.Context, query string) (string, 
 		return "", err
 	}
 
-	logrus.Debugf("query: %s\n  answer: %+v", query, answer)
+	// logrus.Debugf("query: %s\n  answer: %+v", query, answer)
 
 	return answer.Content, nil
 }
 
-func (m *PluginManager) choicePlugins(answer string) []Plugin {
+func (m *PluginManager) choicePlugins(answer string) []PluginContext {
 
 	lines := strings.Split(answer, "\n")
 
-	plugins := make([]Plugin, 0, len(lines))
+	pluginContexts := make([]PluginContext, 0, len(lines))
 
 	for _, line := range lines {
+
+		logrus.Debugf("select one line: %s", line)
 
 		// Split by space
 		// IF only ONE column, it's function name without args.
@@ -132,12 +166,26 @@ func (m *PluginManager) choicePlugins(answer string) []Plugin {
 			continue
 		}
 
-		n := strings.ToLower(ss[0])
+		name := strings.ToLower(ss[0])
+		var input string
+		if len(ss) == 2 {
+			input = ss[1]
+			input = strings.TrimLeft(input, `"`)
+			input = strings.TrimRight(input, `"`)
+		}
 
-		if p, ok := m.plugins[n]; ok {
-			plugins = append(plugins, p)
+		if p, ok := m.plugins[name]; ok {
+
+			logrus.Debugf("choice one plug with args: plugin=%v args=%v", name, input)
+
+			pluginCtx := PluginContext{
+				Plugin: p,
+				Input:  input,
+			}
+
+			pluginContexts = append(pluginContexts, pluginCtx)
 		}
 	}
 
-	return plugins
+	return pluginContexts
 }
