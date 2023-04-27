@@ -24,3 +24,10 @@ Run test:
 go test -v ./...
 ```
 
+
+# RELEASE
+
+## v0.1.0
+
+1. init project.
+2. support plugin: Google for search, calculator for mathematical calculations.
