@@ -2,11 +2,13 @@ package llmplugin
 
 import (
 	"context"
+	"os"
 	"testing"
 
 	"github.com/agi-cn/llmplugin/llm"
 	"github.com/agi-cn/llmplugin/llm/openai"
 	"github.com/agi-cn/llmplugin/plugins/calculator"
+	"github.com/joho/godotenv"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -57,7 +59,7 @@ func TestChoicePlugins(t *testing.T) {
 
 	t.Run("Choice Calculator", func(t *testing.T) {
 
-		answer := "Calculator 1+4"
+		answer := "Calculator: 1+4"
 		got := manager.choicePlugins(answer)
 
 		assert.True(t,
@@ -65,7 +67,7 @@ func TestChoicePlugins(t *testing.T) {
 	})
 
 	t.Run("Choice Weather", func(t *testing.T) {
-		answer := "Weather"
+		answer := "Weather: "
 		got := manager.choicePlugins(answer)
 
 		assert.True(t,
@@ -75,9 +77,14 @@ func TestChoicePlugins(t *testing.T) {
 }
 
 func newChatGPTManager() *PluginManager {
+	_ = godotenv.Load() // ignore if file not exists
+
 	var llmer llm.LLMer
 	{
-		token := "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"
+		token := os.Getenv("OPENAI_TOKEN")
+		if len(token) == 0 {
+			panic("empty openai token: set os env: OPENAI_TOKEN")
+		}
 		llmer = openai.NewChatGPT(token)
 	}
 

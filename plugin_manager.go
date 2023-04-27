@@ -96,13 +96,14 @@ func (m *PluginManager) makePrompt(query string) string {
 	You can call one of the following functions:
 	%s
 
-	In each response, you must start with a function call like Tool name and args, split by space,like:
-	Google "query"
-	Weather
+	In each response, you must start with a function call like Tool name and args, split by ':',like:
+	Google: query
+	Weather:
 
-	Don't explain why you use a tool. If you cannot figure out the answer, you say ’I don’t know’.
+	Don't explain why you use a tool. If you cannot figure out the answer, you say 'I don’t know'.
 
 	Select only the corresponding tool and do not return any results.`,
+
 		query,
 		tools,
 	)
@@ -161,17 +162,16 @@ func (m *PluginManager) choicePlugins(answer string) []PluginContext {
 		// IF only ONE column, it's function name without args.
 		// IF TWO column, it's function name with args.
 
-		ss := strings.Split(line, " ")
+		ss := strings.Split(line, ":")
 		if len(ss) == 0 {
+			logrus.Warnf("answer line invalid: %s", line)
 			continue
 		}
 
-		name := strings.ToLower(ss[0])
+		name := strings.TrimSpace(strings.ToLower(ss[0]))
 		var input string
 		if len(ss) == 2 {
-			input = ss[1]
-			input = strings.TrimLeft(input, `"`)
-			input = strings.TrimRight(input, `"`)
+			input = strings.TrimSpace(ss[1])
 		}
 
 		if p, ok := m.plugins[name]; ok {
