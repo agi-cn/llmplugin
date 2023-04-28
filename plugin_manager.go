@@ -155,8 +155,11 @@ func (m *PluginManager) choicePlugins(answer string) []PluginContext {
 	pluginContexts := make([]PluginContext, 0, len(lines))
 
 	for _, line := range lines {
-
 		logrus.Debugf("select one line: %s", line)
+
+		if line == `I don’t know.` {
+			continue
+		}
 
 		// Split by space
 		// IF only ONE column, it's function name without args.

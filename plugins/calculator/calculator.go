@@ -8,26 +8,20 @@ import (
 )
 
 const (
-	desc = `A calculator, capable of performing mathematical calculations, where the input is a description of a mathematical expression and the return is the result of the calculation. For example: the input is: one plus two, the return is three.`
+	pluginName         = `Calculator`
+	pluginDesc         = `A calculator, capable of performing mathematical calculations, where the input is a description of a mathematical expression and the return is the result of the calculation. For example: the input is: one plus two, the return is three.`
+	pluginInputExample = `1+2`
 )
 
-type Calculator struct {
-	Name         string
-	Desc         string
-	InputExample string
-}
+type Calculator struct{}
 
-func NewCalculator(name, input string) *Calculator {
+func NewCalculator() *Calculator {
 
-	return &Calculator{
-		Name:         name,
-		Desc:         desc,
-		InputExample: input,
-	}
+	return &Calculator{}
 }
 
 func (c Calculator) GetInputExample() string {
-	return c.InputExample
+	return pluginInputExample
 }
 
 func (Calculator) Do(ctx context.Context, query string) (answer string, err error) {
@@ -41,9 +35,9 @@ func (Calculator) Do(ctx context.Context, query string) (answer string, err erro
 }
 
 func (c Calculator) GetName() string {
-	return c.Name
+	return pluginName
 }
 
 func (c Calculator) GetDesc() string {
-	return c.Desc
+	return pluginDesc
 }
