@@ -8,6 +8,7 @@ import (
 	"github.com/agi-cn/llmplugin/llm"
 	"github.com/agi-cn/llmplugin/llm/openai"
 	"github.com/agi-cn/llmplugin/plugins/calculator"
+	"github.com/agi-cn/llmplugin/plugins/google"
 	"github.com/joho/godotenv"
 
 	"github.com/stretchr/testify/assert"
@@ -74,6 +75,14 @@ func TestChoicePlugins(t *testing.T) {
 			includePlugin(got, "Weather"))
 
 	})
+
+	t.Run("Choice Google", func(t *testing.T) {
+		answer := `Google: 今天NBA比赛赛程表`
+		got := manager.choicePlugins(answer)
+
+		assert.True(t,
+			includePlugin(got, "Google"))
+	})
 }
 
 func newChatGPTManager() *PluginManager {
@@ -94,6 +103,12 @@ func newChatGPTManager() *PluginManager {
 }
 
 func newPlugins() []Plugin {
+
+	var (
+		googleEngineID = os.Getenv("GOOGLE_ENGINE_ID")
+		googleToken    = os.Getenv("GOOGLE_TOKEN")
+	)
+
 	plugins := []Plugin{
 		&SimplePlugin{
 			Name:         "Weather",
@@ -105,7 +120,9 @@ func newPlugins() []Plugin {
 			},
 		},
 
-		calculator.NewCalculator("Calculator", `1+2`),
+		calculator.NewCalculator(),
+
+		google.NewGoogle(googleEngineID, googleToken),
 	}
 	return plugins
 }
