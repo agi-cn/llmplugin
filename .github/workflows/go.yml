@@ -23,9 +23,10 @@ jobs:
       run: go version
 
     - name: Set up environment variables
-      run: echo "GOOGLE_ENGINE_ID=${{ secrets.GOOGLE_ENGINE_ID }}" >> $GITHUB_ENV
-      run: echo "GOOGLE_TOKEN=${{ secrets.GOOGLE_TOKEN }}" >> $GITHUB_ENV
-      run: echo "OPENAI_TOKEN=${{ secrets.OPENAI_TOKEN }}" >> $GITHUB_ENV
+      run: |
+        echo "GOOGLE_ENGINE_ID=${{ secrets.GOOGLE_ENGINE_ID }}" >> $GITHUB_ENV
+        echo "GOOGLE_TOKEN=${{ secrets.GOOGLE_TOKEN }}" >> $GITHUB_ENV
+        echo "OPENAI_TOKEN=${{ secrets.OPENAI_TOKEN }}" >> $GITHUB_ENV
 
     - name: Get dependencies
       run: go mod download
