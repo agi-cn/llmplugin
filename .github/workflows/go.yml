@@ -1,0 +1,37 @@
+name: Go
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Set up Go
+      uses: actions/setup-go@v2
+      with:
+        go-version: 1.20
+
+    - name: Check out code into the Go module directory
+      uses: actions/checkout@v2
+
+    - name: Set up environment variables
+      run: |
+        echo "OPENAI_TOKEN=${{ secrets.OPENAI_TOKEN }}" >> $GITHUB_ENV
+        echo "GOOGLE_TOKEN=${{ secrets.GOOGLE_TOKEN }}" >> $GITHUB_ENV
+        echo "GOOGLE_ENGINE_ID=${{ secrets.GOOGLE_ENGINE_ID }}" >> $GITHUB_ENV
+
+    - name: Get dependencies
+      run: go mod download
+
+    - name: Run tests
+      run: go test -v ./...
+
+    - name: Notify reviewer if tests pass
+      if: ${{ success() }}
+      run: echo "Tests passed. Notify the reviewer."
+      # 此处可以添加通知 reviewer 的具体操作，例如发送邮件、发送 Slack 消息等。
