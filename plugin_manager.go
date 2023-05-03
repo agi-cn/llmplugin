@@ -67,9 +67,7 @@ func NewPluginManager(llmer llm.LLMer, opts ...PluginManagerOpt) *PluginManager 
 // Select to choice some plugin to finish the task.
 func (m *PluginManager) Select(ctx context.Context, query string) ([]PluginContext, error) {
 
-	prompt := m.makePrompt(query)
-
-	answer, err := m.chatWithLlm(ctx, prompt)
+	answer, err := m.chatWithLlm(ctx, query)
 	if err != nil {
 		logrus.Errorf("chat with llm error: %v", err)
 		return nil, err
@@ -89,12 +87,13 @@ func (m *PluginManager) makePrompt(query string) string {
 
 	tools := m.makeTaskList()
 
-	prompt := fmt.Sprintf(`You are an helpful and kind assistant to answer questions that can use tools to interact with real world and get access to the latest information.
-	You will performs one task based on the following object:
+	prompt := fmt.Sprintf(`You will performs one task based on the following object:
 	%s
 
-	You can call one of the following functions:
+	You can call one or multiple of the following functions in triple backticks:
+	'''
 	%s
+	'''
 
 	In each response, you must start with a function call like Tool name and args, split by ':',like:
 	Google: query
@@ -118,7 +117,7 @@ func (m *PluginManager) makeTaskList() string {
 	for _, p := range m.plugins {
 
 		line := fmt.Sprintf(
-			`%s, Input Example: %s, It works as: %s`,
+			`- %s, Input Example: %s, It works as: %s`,
 			p.GetName(),
 			p.GetInputExample(),
 			p.GetDesc(),
@@ -131,10 +130,16 @@ func (m *PluginManager) makeTaskList() string {
 }
 
 func (m *PluginManager) chatWithLlm(ctx context.Context, query string) (string, error) {
+	prompt := m.makePrompt(query)
+
 	messages := []llm.LlmMessage{
 		{
+			Role:    llm.RoleSystem,
+			Content: "You are an helpful and kind assistant to answer questions that can use tools to interact with real world and get access to the latest information.",
+		},
+		{
 			Role:    llm.RoleUser,
-			Content: query,
+			Content: prompt,
 		},
 	}
 
