@@ -8,6 +8,12 @@ LLM Plugin system.
 
 Get Google Search token: [https://docs.chatkit.app/tools/google-search.html](https://docs.chatkit.app/tools/google-search.html)
 
+### 2.2 Stable Diffusion
+
+Generate photo by stable diffusion plugin, like:
+
+![girl](./plugins/stablediffusion/test1.jpg)
+
 ## 2. TESTING
 
 1. OpenAI:
