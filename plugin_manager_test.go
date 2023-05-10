@@ -9,6 +9,7 @@ import (
 	"github.com/agi-cn/llmplugin/llm/openai"
 	"github.com/agi-cn/llmplugin/plugins/calculator"
 	"github.com/agi-cn/llmplugin/plugins/google"
+	"github.com/agi-cn/llmplugin/plugins/stablediffusion"
 	"github.com/joho/godotenv"
 
 	"github.com/stretchr/testify/assert"
@@ -41,6 +42,13 @@ func TestManagerSelectPlugin(t *testing.T) {
 		assert.True(t, includePlugin(choices, "Weather"))
 	})
 
+	t.Run("Stable Diffusion", func(t *testing.T) {
+		choices, err := manager.Select(context.Background(), "Draw a girl image")
+		assert.NoError(t, err)
+
+		assert.NotEmpty(t, choices)
+		assert.True(t, includePlugin(choices, "StableDiffusion"))
+	})
 }
 
 func TestManagerSelectPlugin_WithoutChoice(t *testing.T) {
@@ -95,6 +103,7 @@ func TestChoicePlugins(t *testing.T) {
 		assert.True(t,
 			includePlugin(got, "Google"))
 	})
+
 }
 
 func newChatGPTManager() *PluginManager {
@@ -136,5 +145,16 @@ func newPlugins() []Plugin {
 
 		google.NewGoogle(googleEngineID, googleToken),
 	}
+
+	{ // stable diffusion
+		var sdAddr = os.Getenv("SD_ADDR")
+		if len(sdAddr) != 0 {
+			plugins = append(plugins,
+				stablediffusion.NewStableDiffusion(sdAddr),
+			)
+		}
+
+	}
+
 	return plugins
 }
