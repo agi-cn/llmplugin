@@ -38,6 +38,23 @@ func NewChatGPT(token string, opts ...Option) *ChatGPT {
 	return chatgpt
 }
 
+func (c ChatGPT) Summary(ctx context.Context, content string) (string, error) {
+
+	messages := []llm.LlmMessage{
+		{
+			Role:    llm.RoleUser,
+			Content: content,
+		},
+	}
+
+	answer, err := c.Chat(ctx, messages)
+	if err != nil {
+		return "", err
+	}
+
+	return answer.Content, nil
+}
+
 func (c ChatGPT) Chat(ctx context.Context, messages []llm.LlmMessage) (*llm.LlmAnswer, error) {
 
 	chatGPTMessages := c.makeChatGPTMessage(messages)
