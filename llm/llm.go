@@ -31,3 +31,7 @@ type LlmAnswer struct {
 type LLMer interface {
 	Chat(ctx context.Context, messages []LlmMessage) (*LlmAnswer, error)
 }
+
+type Summarizer interface {
+	Summary(ctx context.Context, content string) (string, error)
+}
