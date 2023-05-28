@@ -103,7 +103,7 @@ Here is the google search result, you task is the following,
 2. Select the top 3 most relevant search results to the user's query.
 3. Summarize all the search results into one paragraph using Chinese.
 4. In the corresponding results, give the relevant citation link.
-5. Dont explain why you select the result or ignored search result, just give the final summary result.
+5. Your job is to just summarize the search results, don't explain why you did it. If you ignore certain results, don't summarize those ignored results.
 
 
 Summarize the following text delimited by triple Triple dashes. Each line below is a google search result and the corresponding link.

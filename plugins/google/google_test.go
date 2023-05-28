@@ -51,7 +51,7 @@ func TestGoogleWithSummary(t *testing.T) {
 	chatgpt := openai.NewChatGPT(openaiToken)
 	g := NewGoogle(engineID, apiToken, WithSummarizer(chatgpt))
 
-	answer, err := g.Do(context.Background(), "今天有什么nba比赛?")
+	answer, err := g.Do(context.Background(), "今年欧冠决赛是什么时候?")
 	assert.NoError(t, err)
 
 	assert.NotEmpty(t, answer)
