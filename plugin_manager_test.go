@@ -49,6 +49,15 @@ func TestManagerSelectPlugin(t *testing.T) {
 		assert.NotEmpty(t, choices)
 		assert.True(t, includePlugin(choices, "StableDiffusion"))
 	})
+
+	t.Run("Google", func(t *testing.T) {
+
+		choices, err := manager.Select(context.Background(), "NBA 总决赛现在如何？")
+		assert.NoError(t, err)
+
+		assert.NotEmpty(t, choices)
+		assert.True(t, includePlugin(choices, "Google"))
+	})
 }
 
 func TestManagerSelectPlugin_WithoutChoice(t *testing.T) {
@@ -115,7 +124,7 @@ func newChatGPTManager() *PluginManager {
 		if len(token) == 0 {
 			panic("empty openai token: set os env: OPENAI_TOKEN")
 		}
-		llmer = openai.NewChatGPT(token)
+		llmer = openai.NewChatGPT(token, openai.WithModel("gpt-4"))
 	}
 
 	plugins := newPlugins()

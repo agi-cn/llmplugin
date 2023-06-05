@@ -20,7 +20,7 @@ const (
 
 	pluginInputExample = "Who is Google boss?"
 
-	pluginDesc = `Search something by query input.`
+	pluginDesc = `Search something on the Internet by query input. You can search online to get the information you need, especially to get valid real-time information.`
 )
 
 type Google struct {
